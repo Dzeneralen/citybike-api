@@ -8,6 +8,9 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 
 fun main(args: Array<String>) {
+
+    val cityBikeApiKey = getEnvironmentVariable("BYSYKKEL_API_KEY")
+
     val server = embeddedServer(Netty, 8080) {
         routing {
             get("/") {
@@ -16,4 +19,8 @@ fun main(args: Array<String>) {
         }
     }
     server.start(wait = true)
+}
+
+fun getEnvironmentVariable(name: String) : String? {
+    return System.getenv(name)
 }
