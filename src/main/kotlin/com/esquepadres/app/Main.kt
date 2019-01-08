@@ -5,6 +5,7 @@ import com.esquepadres.externalapi.Station
 import io.ktor.application.*
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.*
+import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.features.StatusPages
@@ -29,6 +30,7 @@ fun main(args: Array<String>) {
 
     val server = embeddedServer(Netty, 8080) {
         install(DefaultHeaders)
+        install(CORS)
         install(ContentNegotiation) {
             gson {
                 setDateFormat(DateFormat.LONG)
@@ -57,7 +59,14 @@ fun main(args: Array<String>) {
                         .filter { s -> s.in_service}
                         .map { s ->
                             val status = availabilityDict[s.id]
-                            StationDTO(s.id , s.title ,status?.bikes ?: 0,status?.locks ?: 0, s.in_service)
+                            StationDTO(
+                                    s.id ,
+                                    s.title ,
+                                    status?.bikes ?: 0,
+                                    status?.locks ?: 0,
+                                    s.in_service,
+                                    Point(s.center.longitude, s.center.latitude)
+                            )
                         }
 
                 call.respond(stationsWithStatus)
