@@ -1,7 +1,8 @@
 package com.esquepadres.app
 
 import com.esquepadres.externalapi.CityBikeAPI
-import com.esquepadres.externalapi.Station
+import com.esquepadres.geotransformer.Geotransformer
+import com.esquepadres.geotransformer.Point
 import io.ktor.application.*
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.*
@@ -25,6 +26,7 @@ fun main(args: Array<String>) {
     val cityBikeApiUrl = "https://oslobysykkel.no/api/v1"
 
     val httpClient = HttpClient(Apache)
+    val geotransformer = Geotransformer()
 
     val cityBikeApi = CityBikeAPI(httpClient, cityBikeApiUrl, cityBikeApiKey)
 
@@ -59,13 +61,15 @@ fun main(args: Array<String>) {
                         .filter { s -> s.in_service}
                         .map { s ->
                             val status = availabilityDict[s.id]
+
+                            val point = geotransformer.transform(Point(s.center.longitude, s.center.latitude, 4326), 25833)
+
                             StationDTO(
                                     s.id ,
                                     s.title ,
                                     status?.bikes ?: 0,
                                     status?.locks ?: 0,
-                                    s.in_service,
-                                    Point(s.center.longitude, s.center.latitude)
+                                    s.in_service, Point(point.x, point.y)
                             )
                         }
 
